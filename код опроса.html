@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Партийные предпочтения и мотивы голосования на выборах Политфака — 2026</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg:#f5f3ee; --card:#ffffff; --ink:#1d2433; --muted:#667085; --line:#e4e1d9;
+    --accent:#2b4c7e; --accent-soft:#e8eef7; --accent-ink:#ffffff; --danger:#b42318;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+  .wrap{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+  .top{display:flex;align-items:center;gap:12px;margin-bottom:16px;min-height:28px}
+  .back{background:none;border:0;color:var(--accent);font:inherit;font-size:15px;padding:4px 0;cursor:pointer;visibility:hidden}
+  .back.show{visibility:visible}
+  .bar{flex:1;height:6px;background:var(--line);border-radius:99px;overflow:hidden}
+  .bar>i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .3s ease}
+  .count{font-size:13px;color:var(--muted);min-width:44px;text-align:right;font-variant-numeric:tabular-nums}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 20px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+  .card.anim{animation:in .25s ease}
+  @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h1{font-size:23px;line-height:1.25;margin:0 0 14px}
+  h2{font-size:19px;line-height:1.35;margin:0 0 6px;font-weight:650}
+  .hint{color:var(--muted);font-size:14px;margin:0 0 16px}
+  p{margin:0 0 12px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 18px}
+  .chip{font-size:13px;background:var(--accent-soft);color:var(--accent);padding:4px 10px;border-radius:99px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;font:inherit;color:inherit;cursor:pointer;transition:border-color .15s,background .15s}
+  .opt:hover{border-color:#c5ccd8}
+  .opt:focus-visible{outline:3px solid #9db4dc;outline-offset:1px}
+  .opt .mk{flex:none;width:20px;height:20px;border:2px solid #b8c0cc;border-radius:50%;display:grid;place-items:center;transition:.15s}
+  .opt.multi .mk{border-radius:6px}
+  .opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .opt.sel .mk{border-color:var(--accent);background:var(--accent)}
+  .opt.sel .mk::after{content:"";width:8px;height:8px;border-radius:50%;background:#fff}
+  .opt.multi.sel .mk::after{width:5px;height:10px;border-radius:0;background:none;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+  .opt.dis{opacity:.45;cursor:not-allowed}
+  .opt .sub{display:block;font-size:13px;color:var(--muted)}
+  .sep{height:1px;background:var(--line);margin:6px 0}
+  .rank .mk{border-radius:50%;font-size:12px;font-weight:700;color:#fff}
+  .rank.sel .mk::after{content:none}
+  .pair{margin:0 0 18px}
+  .pair:last-child{margin-bottom:0}
+  .pair .pn{font-size:13px;color:var(--muted);margin-bottom:6px}
+  .pair .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .pair .opt{align-items:flex-start;height:100%}
+  @media (max-width:440px){.pair .row{grid-template-columns:1fr}}
+  textarea{width:100%;min-height:130px;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;resize:vertical}
+  textarea:focus{outline:none;border-color:var(--accent)}
+  .actions{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:20px}
+  .actions .note{margin-right:auto;font-size:13px;color:var(--muted)}
+  .btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;padding:13px 22px;font:inherit;font-weight:600;cursor:pointer;min-width:120px}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.ghost{background:none;color:var(--accent);padding:13px 4px;min-width:0}
+  .err{color:var(--danger);font-size:14px;margin-top:12px}
+  .center{text-align:center}
+  .big{font-size:42px;margin-bottom:6px}
+  .foot{font-size:12px;color:var(--muted);text-align:center;margin-top:18px}
+  .test{background:#fff4e5;color:#8a4b00;border:1px solid #f5d0a0;border-radius:10px;padding:8px 12px;font-size:13px;margin-bottom:12px}
+  .spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite;margin:10px auto}
+  @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="testbanner"></div>
+  <div class="top" id="top" hidden>
+    <button class="back" id="back" type="button">← Назад</button>
+    <div class="bar"><i id="barfill"></i></div>
+    <div class="count" id="count"></div>
+  </div>
+  <main id="app" aria-live="polite"></main>
+  <div class="foot">Учебный опрос · курс «Политическое управление» · НИУ ВШЭ</div>
+</div>
+
+<script>
+/* ================== НАСТРОЙКА ==================
+   Вставьте сюда адрес веб-приложения Google Apps Script
+   (заканчивается на /exec). Пока адрес пустой, опрос
+   работает в тестовом режиме и никуда не отправляет ответы. */
+const SCRIPT_URL = "";
+const ELECTION_DATE = "4 декабря";
+const STORAGE_KEY = "dozrevay_survey_2026_done";
+/* =============================================== */
+
+const PARTIES = [
+  {t:"ДОЗРЕВАЙ", d:"консервативная партия"},
+  {t:"НАПАС",    d:"коммунистическая партия"},
+  {t:"СВЯЗЬ",    d:"либертарианская партия"},
+  {t:"ЗЕЛЁНКА",  d:"либеральная партия"},
+  {t:"СТАЯ",     d:"коммунитарная партия"},
+];
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const partyOrder = shuffle(PARTIES);
+const partyNames = PARTIES.map(p=>p.t);
+const isParty = v => partyNames.includes(v);
+const partyOpts = (exclude) => partyOrder.filter(p=>p.t!==exclude).map(p=>({t:p.t, d:p.d}));
+
+const A = {};                     // ответы
+const params = new URLSearchParams(location.search);
+const TEST = params.has("test") || !SCRIPT_URL;
+const startedAt = Date.now();
+
+const voter  = () => A.turnout && A.turnout !== "Точно нет";
+const chosen = () => voter() && isParty(A.vote);
+
+/* ---------- Вопросы ----------
+ type: single | multi | rank | pairs | text
+ show(): показывать ли вопрос; stop: значения, при которых опрос завершается */
+const REASONS = shuffle([
+  "Конкретные предложения партии",
+  "Реалистичность обещаний",
+  "Близость ценностей и взглядов на жизнь факультета",
+  "Доверие к лидеру и команде",
+  "Личное знакомство с участниками",
+  "Мнение друзей и однокурсников",
+  "Креатив и стиль кампании",
+  "Впечатление от дебатов и выступлений",
+]);
+const TOPICS = shuffle([
+  "Адаптация первокурсников",
+  "Связь между курсами",
+  "Факультетские традиции и мероприятия",
+  "Учебная нагрузка и расписание",
+  "Информирование о возможностях и событиях",
+  "Карьера и стажировки",
+]);
+const INFLUENCE = shuffle([
+  "Сравнение программ и предложений",
+  "Понятное объяснение, как реализовать программу",
+  "Ответ партии на важный для меня вопрос",
+  "Дебаты или финальные выступления",
+  "Личное знакомство с кандидатами",
+  "Обсуждение с друзьями или однокурсниками",
+  "Яркая публикация или видео",
+]);
+const SOURCES = shuffle([
+  "Telegram-каналы партий",
+  "Ресурсы игрового ЦИК",
+  "Непартийные каналы с обзорами игры",
+  "Курсовые или групповые чаты",
+  "Личные разговоры",
+  "Офлайн-мероприятия и встречи",
+]);
+const PAIRS = [
+  {k:"pair_program_people", a:["Программа","Голосую прежде всего за программу и конкретные предложения"], b:["Люди","Голосую прежде всего за людей, которым доверяю"]},
+  {k:"pair_realism_ambition", a:["Смелые идеи","Важнее смелые идеи, даже если их трудно выполнить"], b:["Реализм","Важнее скромные, но точно выполнимые обещания"]},
+  {k:"pair_self_social", a:["Сам(а)","Решаю сам(а), изучая материалы партий"], b:["Окружение","Во многом ориентируюсь на мнение друзей и однокурсников"]},
+  {k:"pair_tradition_change", a:["Традиции","Важно сохранять и развивать сложившиеся традиции факультета"], b:["Перемены","Важно менять устоявшиеся порядки на факультете"]},
+];
+
+const Q = [
+  {id:"eligible", type:"single", stop:["Нет"],
+   title:"Вы учитесь на 1–4 курсе бакалавриата ОП «Политология» НИУ ВШЭ?",
+   options:["Да","Нет"]},
+  {id:"party_member", type:"single", stop:["Да, состою"],
+   title:"Вы состоите в одной из партийных команд, зарегистрированных на выборах Политфака?",
+   hint:"Опрос адресован избирателям, а не участникам команд.",
+   options:["Нет","Да, состою"]},
+  {id:"course", type:"single",
+   title:"На каком курсе вы учитесь?",
+   options:["1 курс","2 курс","3 курс","4 курс"]},
+  {id:"turnout", type:"single",
+   title:()=>`Собираетесь ли вы голосовать на выборах Политфака ${ELECTION_DATE}?`,
+   options:["Точно да","Скорее да","Пока не знаю","Скорее нет","Точно нет"]},
+  {id:"vote", type:"single", show:voter,
+   title:"Если бы голосование проходило сегодня, за какую партию вы бы проголосовали?",
+   hint:"Партии перечислены в случайном порядке.",
+   options:()=>[...partyOpts(), "—", "Пока не определился(ась)", "Предпочитаю не отвечать"]},
+  {id:"certainty", type:"single", show:chosen,
+   title:()=>`Насколько вы уверены в выборе партии «${A.vote}»?`,
+   options:["Уверен(а), вряд ли передумаю","Скорее уверен(а), но могу передумать","Выбор пока предварительный"]},
+  {id:"decided_when", type:"single", show:chosen,
+   title:"Когда вы определились с этим выбором?",
+   options:["Ещё до начала агитации партий","Во время кампании, после знакомства с партиями","Трудно сказать / не помню"]},
+  {id:"decide_expect", type:"single", show:()=>voter() && !chosen(),
+   title:"Когда, скорее всего, вы примете окончательное решение?",
+   options:["В ближайшие дни, ещё до финала кампании","В последние 1–2 дня перед голосованием","В день голосования","Пока не могу сказать"]},
+  {id:"consider", type:"multi", show:voter,
+   title:()=> chosen() ? "За какие ещё партии вы в принципе могли бы проголосовать?" : "Между какими партиями вы сейчас выбираете?",
+   hint:"Можно выбрать любое количество вариантов.",
+   options:()=>[...partyOpts(chosen()?A.vote:null), "—", {t: chosen() ? "Ни за какие другие" : "Пока ни одна не привлекает", x:true}]},
+  {id:"reject", type:"multi",
+   title:"Есть ли партии, за которые вы точно не стали бы голосовать?",
+   hint:"Можно выбрать любое количество вариантов.",
+   options:()=>[...partyOpts(chosen()?A.vote:null), "—", {t:"Нет таких партий", x:true}, {t:"Предпочитаю не отвечать", x:true}]},
+  {id:"closest", type:"single",
+   title:"Какая партия ближе всего вам по взглядам на жизнь факультета?",
+   hint:"Независимо от того, за кого вы собираетесь голосовать.",
+   options:()=>[...partyOpts(), "—", "Ни одна", "Трудно сказать"]},
+  {id:"reasons", type:"rank", n:3, show:voter,
+   title:"Что важнее всего для вашего выбора?",
+   hint:"Можно выбрать до 3 вариантов. Нажимайте по порядку важности: сначала самую важную. Повторное нажатие снимает выбор.",
+   options:()=>REASONS},
+  {id:"pairs", type:"pairs",
+   title:"Какое утверждение вам ближе?",
+   hint:"В каждой паре выберите одно, даже если согласны с обоими частично."},
+  {id:"topics", type:"multi", max:3,
+   title:"Какие темы жизни Политфака для вас самые важные?",
+   hint:"Можно выбрать до 3 вариантов.",
+   options:()=>TOPICS},
+  {id:"influence", type:"multi", max:2, show:voter,
+   title:"Что ещё могло бы повлиять на ваше решение?",
+   hint:"Можно выбрать до 2 вариантов.",
+   options:()=>[...INFLUENCE, "—", {t:"Моё решение уже не изменится", x:true}]},
+  {id:"sources", type:"multi",
+   title:"Где вы уже встречали материалы или обсуждения кампании?",
+   hint:"Можно выбрать любое количество вариантов.",
+   options:()=>[...SOURCES, "—", {t:"Нигде не встречал(а)", x:true}]},
+  {id:"format", type:"single",
+   title:"Какой формат лучше всего помог бы вам понять позицию партии?",
+   options:["Короткое изложение программы","Разбор одного конкретного предложения","Видео партии","Дебаты","Личная встреча с командой","Ни один из перечисленных"]},
+  {id:"aware_dozrevay", type:"single",
+   title:"Знали ли вы о партии «ДОЗРЕВАЙ» до этого опроса?",
+   options:["Видел(а) материалы или знаком(а) с программой","Слышал(а) название","Нет","Трудно сказать"]},
+  {id:"open", type:"text", optional:true,
+   title:"Что в кампаниях партий помогло вам определиться — или чего не хватает для решения?",
+   hint:"Необязательный вопрос. Пишите свободно."},
+];
+
+const val = (f)=> typeof f==="function" ? f() : f;
+const norm = (o)=> typeof o==="string" ? (o==="—" ? {sep:true} : {t:o}) : o;
+const visible = ()=> Q.filter(q=>!q.show || q.show());
+
+/* ---------- Навигация ---------- */
+const app = document.getElementById("app");
+let stack = [];   // стек id
+let cur = null;     // текущий id или служебный экран
+
+function go(id, push=true){
+  if(push && cur && Q.some(q=>q.id===cur)) stack.push(cur);
+  cur = id; render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function nextFrom(id){
+  const vis = visible(); const i = vis.findIndex(q=>q.id===id);
+  return vis[i+1] ? vis[i+1].id : "__submit";
+}
+function advance(q){
+  const v = A[q.id];
+  if(q.stop && q.stop.includes(v)){ screenedOut(q); return; }
+  const nx = nextFrom(q.id);
+  nx==="__submit" ? submit() : go(nx);
+}
+document.getElementById("back").onclick = ()=>{
+  const prev = stack.pop(); if(prev){ cur=prev; render(); }
+};
+
+function progress(){
+  const vis = visible(); const i = vis.findIndex(q=>q.id===cur);
+  const top = document.getElementById("top");
+  if(i<0){ top.hidden = true; return; }
+  top.hidden = false;
+  document.getElementById("barfill").style.width = Math.round(i/vis.length*100)+"%";
+  document.getElementById("count").textContent = `${i+1} / ${vis.length}`;
+  document.getElementById("back").classList.toggle("show", stack.length>0);
+}
+
+/* ---------- Отрисовка ---------- */
+function el(tag, attrs={}, ...kids){
+  const e = document.createElement(tag);
+  for(const [k,v] of Object.entries(attrs)){
+    if(k==="class") e.className=v; else if(k.startsWith("on")) e[k]=v; else if(v!==false && v!=null) e.setAttribute(k,v===true?"":v);
+  }
+  for(const c of kids.flat()){ if(c==null) continue; e.append(c.nodeType?c:document.createTextNode(c)); }
+  return e;
+}
+function card(...kids){ const c = el("section",{class:"card anim"}, ...kids); app.replaceChildren(c); return c; }
+
+function render(){
+  progress();
+  if(cur==="__intro") return renderIntro();
+  const q = Q.find(x=>x.id===cur);
+  if(!q) return;
+  const head = [el("h2",{}, val(q.title)), q.hint ? el("p",{class:"hint"}, q.hint) : null];
+  ({single:renderSingle, multi:renderMulti, rank:renderRank, pairs:renderPairs, text:renderText})[q.type](q, head);
+}
+
+function optButton(o, {multi=false, selected=false, disabled=false, onclick, badge}={}){
+  const mk = el("span",{class:"mk","aria-hidden":"true"}, badge||"");
+  const label = el("span",{}, o.t, o.d ? el("span",{class:"sub"}, o.d) : null);
+  return el("button",{type:"button", class:`opt${multi?" multi":""}${selected?" sel":""}${disabled?" dis":""}`,
+    "aria-pressed": selected?"true":"false", disabled: disabled, onclick}, mk, label);
+}
+
+function renderSingle(q, head){
+  const opts = val(q.options).map(norm);
+  const box = el("div",{class:"opts", role:"radiogroup"});
+  opts.forEach(o=>{
+    if(o.sep){ box.append(el("div",{class:"sep"})); return; }
+    box.append(optButton(o,{selected:A[q.id]===o.t, onclick:()=>{
+      A[q.id]=o.t; render();
+      setTimeout(()=>advance(q), 220);
+    }}));
+  });
+  card(...head, box);
+}
+
+function renderMulti(q, head){
+  const opts = val(q.options).map(norm);
+  const valid = new Set(opts.filter(o=>o.t).map(o=>o.t));
+  let sel = (A[q.id]||[]).filter(v=>valid.has(v));  // убираем устаревшие (если поменялся выбор партии)
+  A[q.id] = sel;
+  const box = el("div",{class:"opts"});
+  const btn = el("button",{type:"button", class:"btn", onclick:()=>advance(q)}, "Далее");
+  const note = el("span",{class:"note"});
+  function draw(){
+    box.replaceChildren();
+    const hasEx = sel.some(v=>opts.find(o=>o.t===v)?.x);
+    opts.forEach(o=>{
+      if(o.sep){ box.append(el("div",{class:"sep"})); return; }
+      const on = sel.includes(o.t);
+      const full = q.max && sel.length>=q.max && !on && !o.x;
+      box.append(optButton(o,{multi:true, selected:on, disabled: full || (hasEx && !on && !o.x), onclick:()=>{
+        if(on) sel = sel.filter(v=>v!==o.t);
+        else if(o.x) sel = [o.t];
+        else sel = [...sel.filter(v=>!opts.find(p=>p.t===v)?.x), o.t];
+        A[q.id]=sel; draw();
+      }}));
+    });
+    btn.disabled = !q.optional && sel.length===0;
+    note.textContent = q.max ? `Выбрано ${sel.filter(v=>!opts.find(o=>o.t===v)?.x).length} из ${q.max}` : "";
+  }
+  draw();
+  card(...head, box, el("div",{class:"actions"}, note, btn));
+}
+
+function renderRank(q, head){
+  const opts = val(q.options).map(norm);
+  let sel = A[q.id]||[];
+  const box = el("div",{class:"opts"});
+  const btn = el("button",{type:"button", class:"btn", onclick:()=>advance(q)}, "Далее");
+  const note = el("span",{class:"note"});
+  function draw(){
+    box.replaceChildren();
+    opts.forEach(o=>{
+      const r = sel.indexOf(o.t);
+      const on = r>=0;
+      box.append(optButton(o,{selected:on, badge:on?String(r+1):"", disabled:!on && sel.length>=q.n, onclick:()=>{
+        sel = on ? sel.filter(v=>v!==o.t) : [...sel, o.t];
+        A[q.id]=sel; draw();
+      }}));
+      box.lastChild.classList.add("rank");
+    });
+    btn.disabled = sel.length===0;
+    note.textContent = `Выбрано ${sel.length} из ${q.n}`;
+  }
+  draw();
+  card(...head, box, el("div",{class:"actions"}, note, btn));
+}
+
+function renderPairs(q, head){
+  A.pairs = A.pairs || {};
+  const wrap = el("div",{});
+  const btn = el("button",{type:"button", class:"btn", onclick:()=>advance(q)}, "Далее");
+  function draw(){
+    wrap.replaceChildren();
+    PAIRS.forEach((p,i)=>{
+      const row = el("div",{class:"row", role:"radiogroup"});
+      [p.a,p.b].forEach(side=>{
+        row.append(optButton({t:side[1]},{selected:A.pairs[p.k]===side[0], onclick:()=>{ A.pairs[p.k]=side[0]; draw(); }}));
+      });
+      wrap.append(el("div",{class:"pair"}, el("div",{class:"pn"}, `Пара ${i+1} из ${PAIRS.length}`), row));
+    });
+    btn.disabled = PAIRS.some(p=>!A.pairs[p.k]);
+  }
+  draw();
+  card(...head, wrap, el("div",{class:"actions"}, btn));
+}
+
+function renderText(q, head){
+  const ta = el("textarea",{maxlength:"2000", placeholder:"Ваш ответ"});
+  ta.value = A[q.id]||"";
+  ta.oninput = ()=>{ A[q.id]=ta.value; };
+  const btn = el("button",{type:"button", class:"btn", onclick:()=>advance(q)}, "Отправить ответы");
+  card(...head, ta, el("div",{class:"actions"}, btn));
+}
+
+/* ---------- Служебные экраны ---------- */
+function renderIntro(){
+  card(
+    el("h1",{}, "Партийные предпочтения и мотивы голосования на выборах Политфака — 2026"),
+    el("div",{class:"meta"}, el("span",{class:"chip"},"≈ 4 минуты"), el("span",{class:"chip"},"Анонимно"), el("span",{class:"chip"},"Добровольно")),
+    el("p",{}, "Партия «ДОЗРЕВАЙ» проводит учебный опрос в рамках курса «Политическое управление»."),
+    el("p",{}, "Ответы используются только для учебного отчёта и доступны исключительно членам партии и проверяющему преподавателю. Мы не собираем имена, почту и другие данные, по которым вас можно узнать."),
+    el("p",{}, "Пожалуйста, заполните анкету один раз. Здесь нет правильных и неправильных ответов — нам важно ваше честное мнение."),
+    el("div",{class:"actions"}, el("button",{type:"button", class:"btn", onclick:()=>{ A.consent="Да"; go(Q[0].id,false); }}, "Согласен(на), начать"))
+  );
+}
+function screenedOut(q){
+  send({status:"screened_out", screened_at:q.id});
+  document.getElementById("top").hidden = true;
+  card(el("div",{class:"center"},
+    el("div",{class:"big"},"🙏"),
+    el("h2",{}, "Спасибо!"),
+    el("p",{class:"hint"}, q.id==="party_member"
+      ? "Этот опрос адресован избирателям, поэтому участникам партийных команд проходить его не нужно."
+      : "Этот опрос адресован студентам бакалавриата ОП «Политология», поэтому дальше проходить его не нужно.")));
+  markDone();
+}
+function alreadyDone(){
+  card(el("div",{class:"center"},
+    el("div",{class:"big"},"✓"),
+    el("h2",{}, "Вы уже прошли этот опрос"),
+    el("p",{class:"hint"}, "С этого устройства анкета уже была отправлена. Спасибо за участие!"),
+    el("button",{type:"button", class:"btn ghost", onclick:()=>{ A.repeat_device="Да"; go("__intro",false); }}, "Это общее устройство, я ещё не проходил(а)")));
+}
+
+/* ---------- Сегментация и отправка ---------- */
+function segment(){
+  if(!voter()) return "Не собирается голосовать";
+  if(chosen()) switch(A.decided_when){
+    case "Ещё до начала агитации партий": return "PCD";
+    case "Во время кампании, после знакомства с партиями": return "CD";
+    default: return "Определились (время решения неизвестно)";
+  }
+  switch(A.decide_expect){
+    case "В ближайшие дни, ещё до финала кампании": return "CD";
+    case "В последние 1–2 дня перед голосованием":
+    case "В день голосования": return "LMD";
+    default: return "Не определились (срок неизвестен)";
+  }
+}
+function payload(extra={}){
+  const j = v => Array.isArray(v) ? v.join("; ") : (v ?? "");
+  const r = A.reasons||[];
+  const row = {
+    response_id: (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2)),
+    status: "complete",
+    test: TEST ? "Да" : "",
+    repeat_device: A.repeat_device||"",
+    duration_sec: Math.round((Date.now()-startedAt)/1000),
+    consent: A.consent||"",
+    eligible: A.eligible||"", party_member: A.party_member||"",
+    course: A.course||"", turnout: A.turnout||"",
+    vote: A.vote||"", certainty: A.certainty||"",
+    decided_when: A.decided_when||"", decide_expect: A.decide_expect||"",
+    segment: "",
+    consider: j(A.consider), reject: j(A.reject), closest: A.closest||"",
+    reason_1: r[0]||"", reason_2: r[1]||"", reason_3: r[2]||"",
+    topics: j(A.topics), influence: j(A.influence), sources: j(A.sources),
+    format: A.format||"", aware_dozrevay: A.aware_dozrevay||"",
+    open: (A.open||"").trim(),
+    party_order: partyOrder.map(p=>p.t).join(" > "),
+  };
+  PAIRS.forEach(p=>{ row[p.k] = (A.pairs||{})[p.k]||""; });
+  Object.assign(row, extra);
+  if(row.status==="complete") row.segment = segment();
+  return row;
+}
+async function send(extra){
+  const data = payload(extra);
+  if(TEST) console.log("[тестовый режим] ответ:", data);
+  if(!SCRIPT_URL) return true;
+  await fetch(SCRIPT_URL, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(data)});
+  return true;
+}
+function markDone(){ if(!TEST){ try{ localStorage.setItem(STORAGE_KEY,"1"); }catch(e){} } }
+
+async function submit(){
+  document.getElementById("top").hidden = true;
+  card(el("div",{class:"center"}, el("div",{class:"spin"}), el("p",{class:"hint"},"Отправляем ответы…")));
+  try{
+    await send({});
+    markDone();
+    card(el("div",{class:"center"},
+      el("div",{class:"big"},"🎉"),
+      el("h2",{}, "Спасибо, ответы отправлены!"),
+      el("p",{class:"hint"}, TEST ? "Тестовый режим: ответы никуда не отправлялись (см. консоль браузера)." : "Можно закрыть страницу. Будем рады, если поделитесь опросом с однокурсниками.")));
+  }catch(e){
+    card(el("div",{class:"center"},
+      el("h2",{}, "Не удалось отправить ответы"),
+      el("p",{class:"hint"}, "Проверьте интернет-соединение и попробуйте ещё раз. Ваши ответы сохранены на этой странице."),
+      el("button",{type:"button", class:"btn", onclick:submit}, "Отправить ещё раз")));
+  }
+}
+
+/* ---------- Старт ---------- */
+if(TEST) document.getElementById("testbanner").append(el("div",{class:"test"}, SCRIPT_URL ? "Тестовый режим (?test): ответ будет записан с пометкой test." : "Тестовый режим: адрес Google Apps Script не указан, ответы никуда не отправляются."));
+let done=false; try{ done = localStorage.getItem(STORAGE_KEY)==="1"; }catch(e){}
+if(done && !TEST) alreadyDone(); else go("__intro", false);
+</script>
+</body>
+</html>
